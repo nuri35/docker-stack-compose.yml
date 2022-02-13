@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+   mysqldb:
+     image: mysql:5.7
+     environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD_FILE: /run/secrets/my_file_secret
+     networks:
+      - webnet
+     secrets:
+       - my_file_secret
+
+   websrv:
+     image: wordpress:latest
+     deploy:
+       replicas: 2
+      
+     environment:
+       WORDPRESS_DB_HOST: database:3306
+       WORDPRESS_DB_USER: exampleuser
+       WORDPRESS_DB_PASSWORD_FILE: /run/secrets/my_file_secret
+       WORDPRESS_DB_NAME: exampledb
+    
+     secrets:
+       - my_file_secret
+
+     depends_on:
+       - mysqldb
+     ports:
+       - "8080:80"
+     restart: always
+     networks:
+       - webnet
+    
+networks:
+  webnet:
+    driver: overlay
+
+secrets:                       
+  my_file_secret:
+    file: dbsifre.txt
+
+
+     
